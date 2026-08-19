@@ -46,12 +46,12 @@ It is a strong example of a Python + Data Science project that demonstrates both
 ### Stage 2 — Data quality and validation
 - [x] Define transaction schema and column mapping
 - [x] Validate input records with Pydantic
-- [ ] Clean missing values and invalid records
-- [ ] Normalize dates, numeric fields, and text values
+- [x] Clean missing values and invalid records
+- [x] Normalize dates, numeric fields, and text values
 
 ### Stage 3 — Analytics
 - [x] Perform initial exploratory data analysis
-- [ ] Calculate revenue, orders, and average order value as reusable analytics functions
+- [x] Calculate revenue, orders, and average order value as reusable analytics functions
 - [ ] Build retention and cohort analysis
 - [ ] Perform customer segmentation and RFM analysis
 
@@ -77,19 +77,23 @@ It is a strong example of a Python + Data Science project that demonstrates both
 ├── scripts/
 │   └── download_dataset.py
 ├── notebooks/
-│   └── dataset.ipynb
+│   └── eda.ipynb
 ├── src/
 │   ├── __init__.py
 │   ├── config.py
 │   ├── data/
 │   │   ├── __init__.py
 │   │   ├── loader.py
+│   │   ├── preprocessing.py
 │   │   └── schema.py
 │   ├── analytics/
+│   │   └── sales.py
 │   ├── ml/
 │   └── api/
 ├── tests/
 │   ├── test_data_loader.py
+│   ├── test_preprocessing.py
+│   ├── test_sales_analytics.py
 │   └── test_transaction_schema.py
 ├── .gitignore
 ├── README.md
@@ -120,7 +124,7 @@ invoice_no, stock_code, description, quantity, invoice_date, unit_price, custome
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/Klepats/E-commerce-Analytics-Platform.git
 cd ecommerce-analytics
 ```
 
@@ -202,19 +206,6 @@ data/raw/online_retail_ii.zip
 
 The project expects the raw dataset to be loaded from `data/raw/online_retail_II.xlsx` and then normalized to the internal schema used by the project.
 
-### Example: load transactions
-
-```python
-from pathlib import Path
-from src.data.loader import load_transactions
-
-file_path = Path("data/raw/online_retail_II.xlsx")
-transactions = load_transactions(file_path)
-
-print(transactions.head())
-print(transactions.columns.tolist())
-```
-
 The loader automatically:
 
 - reads the Excel file
@@ -228,33 +219,44 @@ Expected normalized columns:
 invoice_no, stock_code, description, quantity, invoice_date, unit_price, customer_id, country
 ```
 
-### Example: inspect the loaded data
-
-```python
-print(transactions.shape)
-print(transactions["invoice_no"].head())
-print(transactions["country"].value_counts().head())
-```
-
 ## Exploratory data analysis
 
-The first EDA stage is available in [notebooks/dataset.ipynb](notebooks/dataset.ipynb). It loads the downloaded workbook through the project loader and checks:
+The first EDA stage is available in [notebooks/eda.ipynb](notebooks/eda.ipynb). It loads the downloaded workbook through the project loader and checks:
 
 - dataset size, date range, and unique invoices, products, and customers;
 - missing customer IDs, missing descriptions, duplicates, returns, and zero-price rows;
 - gross revenue, return value, net revenue, sales lines, and return lines;
 - monthly revenue, order count, customer count, and average order value;
-- revenue concentration by country and product.
+- revenue concentration by country and product;
+- anonymous versus identified customer coverage;
+- invoice-level order value distribution;
+- monthly and country-level return behavior;
+- customer-level RFM feature preparation.
 
 The current dataset contains `1,067,371` rows covering December 2009 to December 2011. Customer IDs are missing in `22.77%` of rows, while negative quantities represent return transactions and should remain identifiable during preprocessing.
 
 To open the notebook in VS Code or Jupyter, first download the dataset and then run the cells from top to bottom:
 
 ```bash
-jupyter notebook notebooks/dataset.ipynb
+jupyter notebook notebooks/eda.ipynb
 ```
 
-The notebook is exploratory; reusable cleaning and analytics logic will be moved into `src/` modules in the following stages.
+The notebook is exploratory and explains the reasoning behind each analysis block. Reusable cleaning and analytics logic will be moved into `src/` modules in the following stages.
+
+## Transaction preprocessing
+
+The reusable preprocessing pipeline is implemented in [src/data/preprocessing.py](src/data/preprocessing.py). It accepts a normalized transaction DataFrame and:
+
+- trims identifier, country, and description fields;
+- converts numeric fields and dates with validation;
+- removes invalid rows, zero-quantity rows, and exact duplicates;
+- preserves negative quantities as return transactions;
+- adds `revenue` and `is_return` fields;
+- returns a `PreprocessingReport` with the number of affected rows.
+
+## Sales analytics
+
+Reusable sales metrics are implemented in [src/analytics/sales.py](src/analytics/sales.py). The module calculates gross revenue, return value, net revenue, sales lines, return lines, monthly orders, customers, and AOV. The exploratory charts remain in [notebooks/eda.ipynb](notebooks/eda.ipynb), while these functions are covered by tests and can later be used by the API.
 
 ## Run tests
 
