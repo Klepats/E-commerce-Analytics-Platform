@@ -22,7 +22,7 @@ def test_load_transactions_returns_dataframe(tmp_path: Path) -> None:
 
     assert isinstance(dataframe, pd.DataFrame)
     assert len(dataframe) == 1
-    assert dataframe.loc[0, "invoice"] == "489434"
+    assert dataframe.loc[0, "invoice_no"] == "489434"
     assert dataframe.loc[0, "stock_code"] == "85048"
 
 

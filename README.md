@@ -44,13 +44,14 @@ It is a strong example of a Python + Data Science project that demonstrates both
 - [x] Create the dataset loader
 
 ### Stage 2 — Data quality and validation
-- [ ] Define transaction schema and column mapping
-- [ ] Validate input data with Pydantic
+- [x] Define transaction schema and column mapping
+- [x] Validate input records with Pydantic
 - [ ] Clean missing values and invalid records
 - [ ] Normalize dates, numeric fields, and text values
 
 ### Stage 3 — Analytics
-- [ ] Calculate revenue, orders, and average order value
+- [x] Perform initial exploratory data analysis
+- [ ] Calculate revenue, orders, and average order value as reusable analytics functions
 - [ ] Build retention and cohort analysis
 - [ ] Perform customer segmentation and RFM analysis
 
@@ -75,6 +76,8 @@ It is a strong example of a Python + Data Science project that demonstrates both
 │   └── processed/
 ├── scripts/
 │   └── download_dataset.py
+├── notebooks/
+│   └── dataset.ipynb
 ├── src/
 │   ├── __init__.py
 │   ├── config.py
@@ -109,7 +112,7 @@ Invoice, StockCode, Description, Quantity, InvoiceDate, Price, Customer ID, Coun
 Inside the project, these are normalized to a cleaner structure:
 
 ```text
-invoice, stock_code, description, quantity, invoice_date, price, customer_id, country
+invoice_no, stock_code, description, quantity, invoice_date, unit_price, customer_id, country
 ```
 
 ## Setup
@@ -222,16 +225,36 @@ The loader automatically:
 Expected normalized columns:
 
 ```text
-invoice, stock_code, description, quantity, invoice_date, price, customer_id, country
+invoice_no, stock_code, description, quantity, invoice_date, unit_price, customer_id, country
 ```
 
 ### Example: inspect the loaded data
 
 ```python
 print(transactions.shape)
-print(transactions["invoice"].head())
+print(transactions["invoice_no"].head())
 print(transactions["country"].value_counts().head())
 ```
+
+## Exploratory data analysis
+
+The first EDA stage is available in [notebooks/dataset.ipynb](notebooks/dataset.ipynb). It loads the downloaded workbook through the project loader and checks:
+
+- dataset size, date range, and unique invoices, products, and customers;
+- missing customer IDs, missing descriptions, duplicates, returns, and zero-price rows;
+- gross revenue, return value, net revenue, sales lines, and return lines;
+- monthly revenue, order count, customer count, and average order value;
+- revenue concentration by country and product.
+
+The current dataset contains `1,067,371` rows covering December 2009 to December 2011. Customer IDs are missing in `22.77%` of rows, while negative quantities represent return transactions and should remain identifiable during preprocessing.
+
+To open the notebook in VS Code or Jupyter, first download the dataset and then run the cells from top to bottom:
+
+```bash
+jupyter notebook notebooks/dataset.ipynb
+```
+
+The notebook is exploratory; reusable cleaning and analytics logic will be moved into `src/` modules in the following stages.
 
 ## Run tests
 

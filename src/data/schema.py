@@ -9,16 +9,16 @@ class TransactionRecord(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    invoice: str = Field(min_length=1)
+    invoice_no: str = Field(min_length=1)
     stock_code: str = Field(min_length=1)
     description: Optional[str] = None
     quantity: int
     invoice_date: datetime
-    price: float = Field(ge=0)
+    unit_price: float = Field(ge=0)
     customer_id: Optional[str] = None
     country: str = Field(min_length=1)
 
-    @field_validator("invoice", "stock_code", "customer_id", mode="before")
+    @field_validator("invoice_no", "stock_code", "customer_id", mode="before")
     @classmethod
     def normalize_identifier(cls, value: object) -> Optional[str]:
         if value is None:
@@ -30,21 +30,21 @@ class TransactionRecord(BaseModel):
 
 TRANSACTION_COLUMNS = tuple(TransactionRecord.model_fields.keys())
 REQUIRED_TRANSACTION_COLUMNS = (
-    "invoice",
+    "invoice_no",
     "stock_code",
     "quantity",
     "invoice_date",
-    "price",
-    "country",
+    "unit_price",
+    "customer_id",
 )
 
 RAW_COLUMN_MAPPING = {
-    "Invoice": "invoice",
+    "Invoice": "invoice_no",
     "StockCode": "stock_code",
     "Description": "description",
     "Quantity": "quantity",
     "InvoiceDate": "invoice_date",
-    "Price": "price",
+    "Price": "unit_price",
     "Customer ID": "customer_id",
     "Country": "country",
 }

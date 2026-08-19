@@ -42,6 +42,7 @@ data/processed/*
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
 
 # IDEs and editors
 .vscode/

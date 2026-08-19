@@ -24,13 +24,13 @@ def read_csv(file_path: str | Path) -> pd.DataFrame:
 
 
 def read_excel(file_path: str | Path) -> pd.DataFrame:
-    """Read an Excel file into a pandas DataFrame."""
-
+    """Read all sheets from an Excel file into a single concatenated DataFrame."""
     path = Path(file_path)
     if not path.exists():
         raise FileNotFoundError(f"Excel file not found: {path}")
 
-    return pd.read_excel(path, dtype=SOURCE_TEXT_COLUMNS)
+    sheets_dict = pd.read_excel(path, sheet_name=None, dtype=SOURCE_TEXT_COLUMNS)
+    return pd.concat(sheets_dict.values(), ignore_index=True)
 
 
 def ensure_columns(dataframe: pd.DataFrame, required_columns: Iterable[str]) -> None:
